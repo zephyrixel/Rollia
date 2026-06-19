@@ -1,0 +1,63 @@
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 3vh, 34px) clamp(24px, 6vw, 76px);
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+  border: 1px solid var(--glass-stroke);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+  animation: stage-breathe 7s ease-in-out infinite;
+  transition: box-shadow 0.6s var(--ease-out-expo);
+}
+
+/* top inner highlight */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: var(--glass-inner-hi);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%);
+  opacity: 0.85;
+}
+
+/* aurora rim (a gradient border via mask-composite), revealed on spin/lock */
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  background: var(--grad-aurora);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out-expo);
+}
+.stage.winding::after,
+.stage.spinning::after { opacity: 0.5; }
+.stage.locked::after { opacity: 0.9; }
+
+.stage.winding,
+.stage.spinning {
+  box-shadow: var(--glass-shadow), 0 0 80px -10px rgba(94, 234, 212, 0.25);
+}
+.stage.locked {
+  box-shadow: var(--glass-shadow), 0 0 120px -8px rgba(125, 225, 255, 0.4);
+}
+
+@keyframes stage-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.012); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage { animation: none; }
+}
