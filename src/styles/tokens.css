@@ -29,7 +29,7 @@
   --glass-fill-strong: rgba(255, 255, 255, 0.085);
   --glass-stroke: rgba(255, 255, 255, 0.12);
   --glass-stroke-hi: rgba(255, 255, 255, 0.24);
-  --glass-blur: 40px;
+  --glass-blur: 32px;
   --glass-shadow:
     0 28px 90px -24px rgba(2, 6, 23, 0.78),
     0 2px 12px rgba(2, 6, 23, 0.45);

@@ -15,7 +15,7 @@ export const DEFAULT_SLOT_H = 120;
 export const REEL_WINDOW_SLOTS = 3.4;
 export const CENTER_INDEX = 2;
 /** How far (px) the reel flies *past* center before the spring pulls it back. */
-export const OVERSHOOT = 30;
+export const OVERSHOOT = 40;
 
 export interface ReelItem {
   key: string;

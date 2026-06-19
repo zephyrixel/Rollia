@@ -43,7 +43,7 @@
   border-radius: var(--r-pill);
   background: linear-gradient(180deg, rgba(20, 28, 54, 0.92), rgba(12, 16, 36, 0.94));
   border: 1px solid var(--glass-stroke);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--glass-shadow);
 }

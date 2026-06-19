@@ -51,8 +51,14 @@ export function NameReel() {
 
   const y = useMotionValue(0);
   const velocity = useVelocity(y);
-  // velocity → motion blur on the whole strip (streaking while it flies)
-  const blurPx = useTransform(velocity, (v) => Math.min(Math.abs(v) * 0.011, 22));
+  // velocity → real Gaussian motion blur on the strip (the streak that sells
+  // the speed). Quantized to 2px steps: a MotionValue only writes to the DOM
+  // when its value changes, so rounding means the blurred strip re-rasterizes
+  // only on the ~dozen step crossings of a roll, not on all ~210 frames.
+  const blurPx = useTransform(velocity, (v) => {
+    const b = Math.min(Math.abs(v) * 0.012, 26);
+    return Math.round(b / 2) * 2;
+  });
   const filter = useMotionTemplate`blur(${blurPx}px)`;
 
   const windowRef = useRef<HTMLDivElement>(null);
@@ -130,7 +136,7 @@ export function NameReel() {
     animRef.current = animate(
       y,
       yFinal,
-      reduced ? { duration: 0.2 } : { type: "spring", stiffness: 210, damping: 15 },
+      reduced ? { duration: 0.2 } : { type: "spring", stiffness: 220, damping: 13 },
     );
     await animRef.current.finished.catch(() => {});
     if (!alive()) return;

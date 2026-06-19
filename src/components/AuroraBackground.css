@@ -17,25 +17,26 @@
   inset: -10%;
   transition: filter 0.7s var(--ease-out-expo);
   animation: aurora-breathe 17s ease-in-out infinite;
-  will-change: filter, transform;
+  will-change: transform;
 }
 .aurora-field.is-spinning {
   animation: aurora-breathe 6s ease-in-out infinite;
 }
 
-/* gentle hue sway keeps the palette alive without drifting off-brand */
+/* passthrough wrapper (kept for structure). NOTE: no animated `filter` here —
+   hue-rotating a parent of blurred, screen-blended blobs forces a continuous
+   full re-raster of the whole composite, every frame, even at idle. The blob
+   drift already keeps the field alive; the palette stays put. */
 .aurora-hue {
   position: absolute;
   inset: 0;
-  animation: aurora-hue 44s ease-in-out infinite;
-  will-change: filter;
 }
 
 .blob {
   position: absolute;
   border-radius: 50%;
   mix-blend-mode: screen;
-  filter: blur(72px);
+  filter: blur(68px);
   opacity: 0.85;
   will-change: transform;
 }
@@ -106,10 +107,6 @@
 @keyframes aurora-breathe {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
-}
-@keyframes aurora-hue {
-  0%, 100% { filter: hue-rotate(-14deg); }
-  50% { filter: hue-rotate(16deg); }
 }
 
 /* ---- film grain ---- */
