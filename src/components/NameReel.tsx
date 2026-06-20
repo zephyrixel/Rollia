@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   animate,
@@ -25,6 +25,10 @@ import "./NameReel.css";
 
 const LEADING_BUFFER_SLOTS = 12;
 const VIRTUAL_OVERSCAN = 12;
+const MAX_MOTION_BLUR_PX = 26;
+// Keep the scrollport outside the masked viewport so blur sampling is not
+// clipped at the visible edge while names enter the reel.
+const BLUR_GUARD_PX = MAX_MOTION_BLUR_PX + 12;
 
 const scrollForSlot = (slot: number, slotH: number, winH: number): number =>
   slot * slotH - (winH - slotH) / 2;
@@ -50,6 +54,7 @@ export function NameReel() {
   const [lockedWinnerKey, setLockedWinnerKey] = useState<string | null>(null);
 
   const itemsRef = useRef<ReelItem[]>([]);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const slotHRef = useRef(DEFAULT_SLOT_H);
   const windowHRef = useRef(DEFAULT_SLOT_H * REEL_WINDOW_SLOTS);
@@ -61,7 +66,7 @@ export function NameReel() {
   const scrollTop = useMotionValue(0);
   const velocity = useVelocity(scrollTop);
   const blurPx = useTransform(velocity, (v) => {
-    const b = Math.min(Math.abs(v) * 0.012, 26);
+    const b = Math.min(Math.abs(v) * 0.012, MAX_MOTION_BLUR_PX);
     return Math.round(b / 2) * 2;
   });
   const filter = useMotionTemplate`blur(${blurPx}px)`;
@@ -151,8 +156,12 @@ export function NameReel() {
     const myRun = ++runIdRef.current;
     const alive = () => myRun === runIdRef.current;
 
-    const winH = windowRef.current?.clientHeight ?? DEFAULT_SLOT_H * REEL_WINDOW_SLOTS;
-    const slotH = winH / REEL_WINDOW_SLOTS;
+    const visibleH =
+      viewportRef.current?.clientHeight ??
+      windowRef.current?.clientHeight ??
+      DEFAULT_SLOT_H * REEL_WINDOW_SLOTS;
+    const winH = windowRef.current?.clientHeight ?? visibleH;
+    const slotH = visibleH / REEL_WINDOW_SLOTS;
     slotHRef.current = slotH;
     windowHRef.current = winH;
     rowVirtualizer.measure();
@@ -203,34 +212,37 @@ export function NameReel() {
   ]
     .filter(Boolean)
     .join(" ");
+  const reelStyle = { "--reel-blur-guard": `${BLUR_GUARD_PX}px` } as CSSProperties;
 
   return (
-    <div className={cls}>
-      <div className="reel-window" ref={windowRef}>
+    <div className={cls} style={reelStyle}>
+      <div className="reel-viewport" ref={viewportRef}>
         {items.length > 0 ? (
-          <motion.div
-            className="reel-strip"
-            style={{ height: rowVirtualizer.getTotalSize(), filter }}
-          >
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const item = items[virtualRow.index];
-              if (!item) return null;
-              return (
-                <div
-                  key={item.key}
-                  className={`reel-row${
-                    item.key === lockedWinnerKey && phase === "locked" ? " row-locked" : ""
-                  }`}
-                  style={{
-                    height: virtualRow.size,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <span className="reel-name">{item.name}</span>
-                </div>
-              );
-            })}
-          </motion.div>
+          <div className="reel-window" ref={windowRef}>
+            <motion.div
+              className="reel-strip"
+              style={{ height: rowVirtualizer.getTotalSize(), filter }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const item = items[virtualRow.index];
+                if (!item) return null;
+                return (
+                  <div
+                    key={item.key}
+                    className={`reel-row${
+                      item.key === lockedWinnerKey && phase === "locked" ? " row-locked" : ""
+                    }`}
+                    style={{
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    <span className="reel-name">{item.name}</span>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </div>
         ) : (
           <div className="reel-idle">
             <span className="reel-idle-kicker">READY</span>

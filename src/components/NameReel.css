@@ -10,18 +10,28 @@
   display: grid;
   place-items: center;
   z-index: 1;
+  --reel-blur-guard: 38px;
 }
 
-.reel-window {
+.reel-viewport {
   position: relative;
   width: 100%;
   height: calc(var(--reel-slot-h) * 3.4);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
+}
+
+.reel-window {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--reel-blur-guard) * -1);
+  bottom: calc(var(--reel-blur-guard) * -1);
   overflow: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   overscroll-behavior: none;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
 }
 .reel-window::-webkit-scrollbar {
   display: none;
@@ -123,7 +133,7 @@
 
 /* ---- idle prompt ---- */
 .reel-idle {
-  height: calc(var(--reel-slot-h) * 3.4);
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
