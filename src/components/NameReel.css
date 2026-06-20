@@ -1,7 +1,8 @@
 /* ============================================================
    NameReel — the physics slot reel
-   Geometry mirrors lib/reel.ts: SLOT_H = --reel-slot-h,
-   CENTER_INDEX = 2  →  strip offset uses (2 + 0.5) = 2.5 slots.
+   The reel is a hidden scroll container powered by TanStack Virtual.
+   JS animates scrollTop so new plans can be appended to the tail without
+   remounting a fresh strip.
    ============================================================ */
 .reel {
   position: relative;
@@ -15,22 +16,35 @@
   position: relative;
   width: 100%;
   height: calc(var(--reel-slot-h) * 3.4);
-  overflow: hidden;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: none;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
 }
+.reel-window::-webkit-scrollbar {
+  display: none;
+}
 
 .reel-strip {
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* place item #CENTER_INDEX at the window center when y = 0 */
-  top: calc(50% - var(--reel-slot-h) * 2.5);
-  will-change: transform, filter;
+  position: relative;
+  width: 100%;
+  opacity: 0;
+  animation: reel-strip-enter 180ms var(--ease-out-quart) forwards;
+  will-change: filter;
+}
+
+@keyframes reel-strip-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .reel-row {
-  height: var(--reel-slot-h);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
